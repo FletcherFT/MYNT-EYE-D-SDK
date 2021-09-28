@@ -1,28 +1,28 @@
 <launch>
   <!-- Device mode -->
-  <arg name="device_color"      default="0" />
-  <arg name="device_depth"      default="1" />
-  <arg name="device_all"        default="2" />
+  <arg name="device_color"      value="0" />
+  <arg name="device_depth"      value="1" />
+  <arg name="device_all"        value="2" />
   <!-- Color mode -->
-  <arg name="color_raw"         default="0" />
-  <arg name="color_rectified"   default="1" />
+  <arg name="color_raw"         value="0" />
+  <arg name="color_rectified"   value="1" />
   <!-- Depth mode -->
-  <arg name="depth_raw"         default="0" />
-  <arg name="depth_gray"        default="1" />
-  <arg name="depth_colorful"    default="2" />
+  <arg name="depth_raw"         value="0" />
+  <arg name="depth_gray"        value="1" />
+  <arg name="depth_colorful"    value="2" />
   <!-- Stream mode -->
-  <arg name="stream_640x480"    default="0" />
-  <arg name="stream_1280x480"   default="1" />
-  <arg name="stream_1280x720"   default="2" />
-  <arg name="stream_2560x720"   default="3" />
+  <arg name="stream_640x480"    value="0" />
+  <arg name="stream_1280x480"   value="1" />
+  <arg name="stream_1280x720"   value="2" />
+  <arg name="stream_2560x720"   value="3" />
   <!-- Stream format -->
-  <arg name="stream_mjpg"       default="0" />
-  <arg name="stream_yuyv"       default="1" />
+  <arg name="stream_mjpg"       value="0" />
+  <arg name="stream_yuyv"       value="1" />
 
   <!-- 0 --> MONO16 -->
   <!-- 1 --> TYPE_16UC1 -->
-  <arg name="type_mono16"        default="0" />
-  <arg name="type_16uc1"         default="1" />
+  <arg name="type_mono16"        value="0" />
+  <arg name="type_16uc1"         value="1" />
 
   <!-- IMU timestamp align -->
   <arg name="imu_timestamp_align" default="true" />

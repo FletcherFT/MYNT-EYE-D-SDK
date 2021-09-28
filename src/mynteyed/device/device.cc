@@ -475,7 +475,7 @@ bool Device::Open(const OpenParams& params) {
   GetStreamIndex(params, &color_res_index_, &depth_res_index_);
 
   CompatibleUSB2(params);
-  CompatibleMJPG(params);
+  //CompatibleMJPG(params);
 
   LOGI("-- Framerate: %d", framerate_);
 
@@ -1555,7 +1555,8 @@ void Device::GetStreamIndex(const std::int32_t& dev_index,
   stream_temp_info_ptr = stream_depth_info_ptr_;
   i = 0;
   while (i < 64) {
-    if (stream_temp_info_ptr->nHeight == height &&
+    if (stream_temp_info_ptr->nWidth == width &&
+        stream_temp_info_ptr->nHeight == height &&
         depth_stream_format == (stream_temp_info_ptr->bFormatMJPG ?
             StreamFormat::STREAM_MJPG : StreamFormat::STREAM_YUYV)) {
       *depth_res_index = i;

@@ -19,6 +19,7 @@ endfunction(checkPackage)
 
 find_package(catkin REQUIRED COMPONENTS
   cv_bridge
+  camera_info_manager
   image_transport
   message_generation
   nodelet
@@ -87,6 +88,7 @@ add_library(mynteye_wrapper_d
   src/mynteye_wrapper_nodelet.cc
   src/pointcloud_generator.cc
 )
+
 target_link_libraries(mynteye_wrapper_d ${LINK_LIBRARIES})
 add_dependencies(mynteye_wrapper_d ${PROJECT_NAME}_generate_messages_cpp)
 
@@ -95,6 +97,9 @@ target_link_libraries(mynteye_wrapper_d_node mynteye_wrapper_d ${LINK_LIBRARIES}
 
 add_executable(mynteye_listener_d src/mynteye_listener.cc)
 target_link_libraries(mynteye_listener_d ${LINK_LIBRARIES})
+
+add_executable(mynteye_stereo_node src/mynteye_stereo_nodelet.cc)
+target_link_libraries(mynteye_stereo_node ${LINK_LIBRARIES})
 
 # install
 

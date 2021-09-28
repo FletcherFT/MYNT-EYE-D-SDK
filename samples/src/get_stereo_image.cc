@@ -45,16 +45,19 @@ int main(int argc, char const* argv[]) {
     //   DEVICE_DEPTH: IMAGE_LEFT_COLOR x IMAGE_RIGHT_COLOR x IMAGE_DEPTH ✓
     //   DEVICE_ALL:   IMAGE_LEFT_COLOR ✓ IMAGE_RIGHT_COLOR ? IMAGE_DEPTH ✓
     // Note: ✓: available, x: unavailable, ?: depends on #stream_mode
-    // params.dev_mode = DeviceMode::DEVICE_ALL;
+    params.dev_mode = DeviceMode::DEVICE_COLOR;
 
     // Color mode: raw(default), rectified
-    // params.color_mode = ColorMode::COLOR_RECTIFIED;
+    params.color_mode = ColorMode::COLOR_RECTIFIED;
+
+    params.color_stream_format = StreamFormat::STREAM_MJPG;
+    params.depth_stream_format = StreamFormat::STREAM_YUYV;
 
     // Stream mode: left color only
     // params.stream_mode = StreamMode::STREAM_640x480;  // vga
-    // params.stream_mode = StreamMode::STREAM_1280x720;  // hd
+    //params.stream_mode = StreamMode::STREAM_1280x720;  // hd
     // Stream mode: left+right color
-    // params.stream_mode = StreamMode::STREAM_1280x480;  // vga
+    //params.stream_mode = StreamMode::STREAM_1280x480;  // vga
     params.stream_mode = StreamMode::STREAM_2560x720;  // hd
 
     // Auto-exposure: true(default), false
@@ -74,7 +77,7 @@ int main(int argc, char const* argv[]) {
     // params.ir_depth_only = true;
 
     // Infrared intensity: 0(default), [0,10]
-    params.ir_intensity = 4;
+    params.ir_intensity = 0;
 
     // Colour depth image, default 5000. [0, 16384]
     params.colour_depth_value = 5000;
