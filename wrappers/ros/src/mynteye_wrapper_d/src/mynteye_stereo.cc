@@ -47,20 +47,24 @@ int main (int argc, char** argv)
 {
   // Initialize ROS
   ros::init (argc, argv, "mynteye_d1200_node");
-  ros::NodeHandle nh;
+  ros::NodeHandle nh("mynteye");
+  ros::NodeHandle leftnh("mynteye/left");
+  ros::NodeHandle rightnh("mynteye/right");
 
   // Image publishers
   image_transport::ImageTransport it(nh);
 
-  image_transport::CameraPublisher pub_left = it.advertiseCamera("mynteye/left/image_raw", 1);
-  image_transport::CameraPublisher pub_right = it.advertiseCamera("mynteye/right/image_raw", 1);
+  image_transport::CameraPublisher pub_left = it.advertiseCamera("left/image_raw", 1);
+  image_transport::CameraPublisher pub_right = it.advertiseCamera("right/image_raw", 1);
+  int fps = 5;
+  nh.getParamCached("fps", fps);
 
   const std::string cname="mynteye_d1200";
-  const std::string url="file://${HOME}/camera_info/test.yaml";
+  const std::string url="package://mynteye_wrapper_d/configurations/${NAME}.yaml";
   camera_info_manager::CameraInfoManager cinfo(nh,cname,url);
 
-  camera_info_manager::CameraInfoManager cinfoleft_(nh, "lefty", url);
-  camera_info_manager::CameraInfoManager cinforight_(nh, "righty", url);
+  camera_info_manager::CameraInfoManager cinfoleft_(leftnh, "left", url);
+  camera_info_manager::CameraInfoManager cinforight_(rightnh, "right", url);
 
 
   // Initialize MYNTEYE camera
@@ -73,7 +77,7 @@ int main (int argc, char** argv)
   // Set parameters for D1200 camera
   OpenParams params(devInfo.index);
   // Framerate: 30(default), [0,60], [30](STREAM_2560x720)
-  params.framerate = 30;
+  params.framerate = fps;
   // Device mode, default DEVICE_ALL
   //   DEVICE_COLOR: IMAGE_LEFT_COLOR ✓ IMAGE_RIGHT_COLOR ? IMAGE_DEPTH x
   //   DEVICE_DEPTH: IMAGE_LEFT_COLOR x IMAGE_RIGHT_COLOR x IMAGE_DEPTH ✓
@@ -85,7 +89,7 @@ int main (int argc, char** argv)
   // Stream mode: left+right color
   params.stream_mode = StreamMode::STREAM_2560x720;  // hd
   params.color_stream_format = StreamFormat::STREAM_MJPG;
-  params.depth_stream_format = StreamFormat::STREAM_YUYV;
+  //params.depth_stream_format = StreamFormat::STREAM_YUYV;
   // Infrared intensity: 0(default), [0,10]
   params.ir_intensity = 0;
   // Auto-exposure: true(default), false
@@ -119,29 +123,28 @@ int main (int argc, char** argv)
 
     header.stamp = ros::Time().now();
 
-    if (left_sub){
-      sensor_msgs::CameraInfoPtr info(new sensor_msgs::CameraInfo(cinfoleft_.getCameraInfo()));
+    //if (left_sub){
+      sensor_msgs::CameraInfoPtr infoleft(new sensor_msgs::CameraInfo(cinfoleft_.getCameraInfo()));
       auto left_color = cam.GetStreamData(ImageType::IMAGE_LEFT_COLOR);
       if (left_color.img){
         cv::Mat left = left_color.img->To(ImageFormat::COLOR_BGR)->ToMat();
         sensor_msgs::ImagePtr left_msg = cv_bridge::CvImage(header, enc::BGR8, left).toImageMsg();
-        info->header.frame_id = left_msg->header.frame_id;
-        info->header.stamp = left_msg->header.stamp;
-        pub_left.publish(left_msg, info);
+        infoleft->header.frame_id = left_msg->header.frame_id;
+        infoleft->header.stamp = left_msg->header.stamp;
+        pub_left.publish(left_msg, infoleft);
       }
-
-    }
-    if (right_sub){
-      sensor_msgs::CameraInfoPtr info(new sensor_msgs::CameraInfo(cinforight_.getCameraInfo()));
+    //}
+    //if (right_sub){
+      sensor_msgs::CameraInfoPtr inforight(new sensor_msgs::CameraInfo(cinforight_.getCameraInfo()));
       auto right_color = cam.GetStreamData(ImageType::IMAGE_RIGHT_COLOR);
       if(right_color.img){
         cv::Mat right = right_color.img->To(ImageFormat::COLOR_BGR)->ToMat();
         sensor_msgs::ImagePtr right_msg = cv_bridge::CvImage(header, enc::BGR8, right).toImageMsg();
-        info->header.frame_id = right_msg->header.frame_id;
-        info->header.stamp = right_msg->header.stamp;
-        pub_right.publish(right_msg, info);
+        inforight->header.frame_id = right_msg->header.frame_id;
+        inforight->header.stamp = right_msg->header.stamp;
+        pub_right.publish(right_msg, inforight);
       }
-    }
+    //}
     
     loop_rate.sleep();
   }

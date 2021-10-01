@@ -98,7 +98,7 @@ target_link_libraries(mynteye_wrapper_d_node mynteye_wrapper_d ${LINK_LIBRARIES}
 add_executable(mynteye_listener_d src/mynteye_listener.cc)
 target_link_libraries(mynteye_listener_d ${LINK_LIBRARIES})
 
-add_executable(mynteye_stereo_node src/mynteye_stereo_nodelet.cc)
+add_executable(mynteye_stereo_node src/mynteye_stereo.cc)
 target_link_libraries(mynteye_stereo_node ${LINK_LIBRARIES})
 
 # install
