@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+	<node name="mynteye_stereo_node" pkg="mynteye_wrapper_d" type="mynteye_stereo_node" output="screen" respawn="true">
+		<param name="/mynteye/left/image_raw/compressed/format" value="png"/>
+		<param name="/mynteye/left/image_raw/compressed/png_level" value="1"/>
+		<param name="/mynteye/right/image_raw/compressed/format" value="png"/>
+		<param name="/mynteye/right/image_raw/compressed/png_level" value="1"/>
+	</node>
+</launch>

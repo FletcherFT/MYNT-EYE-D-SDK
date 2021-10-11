@@ -6,6 +6,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <std_msgs/Header.h>
 
+//#include "mynteyed/device.h"
 #include "mynteyed/camera.h"
 #include "mynteyed/utils.h"
 #include "mynteyed/util/rate.h"
@@ -93,10 +94,10 @@ int main (int argc, char** argv)
   // Infrared intensity: 0(default), [0,10]
   params.ir_intensity = 0;
   // Auto-exposure: true(default), false
-  // params.state_ae = false;
+  params.state_ae = true;
 
   // Auto-white balance: true(default), false
-  // params.state_awb = false;
+  params.state_awb = false;
 
   cam.Open(params);
 
@@ -117,35 +118,32 @@ int main (int argc, char** argv)
   // loop
   ros::Rate loop_rate(params.framerate);
   while (nh.ok()) {
-
-    bool left_sub = pub_left.getNumSubscribers() > 0;
-    bool right_sub = pub_right.getNumSubscribers() > 0;
-
-    header.stamp = ros::Time().now();
-
-    //if (left_sub){
+    // First Get Images from Stream
+    mynteyed::StreamData left_color = cam.GetStreamData(ImageType::IMAGE_LEFT_COLOR);
+    mynteyed::StreamData right_color = cam.GetStreamData(ImageType::IMAGE_RIGHT_COLOR);
+    // Check that they are both available on the same loop
+    if (right_color.img && left_color.img){
+      // Get the timestamp
+      header.stamp = ros::Time().now();
+      // Convert the image to opencv
+      cv::Mat left = left_color.img->To(ImageFormat::COLOR_BGR)->ToMat();
+      // Convert opencv to ROS Image msg
+      sensor_msgs::ImagePtr left_msg = cv_bridge::CvImage(header, enc::BGR8, left).toImageMsg();
+      // Get the camera info
       sensor_msgs::CameraInfoPtr infoleft(new sensor_msgs::CameraInfo(cinfoleft_.getCameraInfo()));
-      auto left_color = cam.GetStreamData(ImageType::IMAGE_LEFT_COLOR);
-      if (left_color.img){
-        cv::Mat left = left_color.img->To(ImageFormat::COLOR_BGR)->ToMat();
-        sensor_msgs::ImagePtr left_msg = cv_bridge::CvImage(header, enc::BGR8, left).toImageMsg();
-        infoleft->header.frame_id = left_msg->header.frame_id;
-        infoleft->header.stamp = left_msg->header.stamp;
-        pub_left.publish(left_msg, infoleft);
-      }
-    //}
-    //if (right_sub){
+      // Set the header from the camera info
+      infoleft->header.frame_id = left_msg->header.frame_id;
+      infoleft->header.stamp = left_msg->header.stamp;
+      // Same steps for right image
+      cv::Mat right = right_color.img->To(ImageFormat::COLOR_BGR)->ToMat();
+      sensor_msgs::ImagePtr right_msg = cv_bridge::CvImage(header, enc::BGR8, right).toImageMsg();
       sensor_msgs::CameraInfoPtr inforight(new sensor_msgs::CameraInfo(cinforight_.getCameraInfo()));
-      auto right_color = cam.GetStreamData(ImageType::IMAGE_RIGHT_COLOR);
-      if(right_color.img){
-        cv::Mat right = right_color.img->To(ImageFormat::COLOR_BGR)->ToMat();
-        sensor_msgs::ImagePtr right_msg = cv_bridge::CvImage(header, enc::BGR8, right).toImageMsg();
-        inforight->header.frame_id = right_msg->header.frame_id;
-        inforight->header.stamp = right_msg->header.stamp;
-        pub_right.publish(right_msg, inforight);
-      }
-    //}
-    
+      inforight->header.frame_id = right_msg->header.frame_id;
+      inforight->header.stamp = right_msg->header.stamp;
+      // Publish the left and right messages
+      pub_left.publish(left_msg, infoleft);
+      pub_right.publish(right_msg, inforight);
+    }
     loop_rate.sleep();
   }
 

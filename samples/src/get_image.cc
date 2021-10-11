@@ -38,24 +38,25 @@ int main(int argc, char const* argv[]) {
   OpenParams params(dev_info.index);
   {
     // Framerate: 10(default usb3.0) 5(default usb2.0), [0,60], [30](STREAM_2560x720)
-    params.framerate = 10;
+    params.framerate = 5;
 
     // Device mode, default DEVICE_ALL
     //   DEVICE_COLOR: IMAGE_LEFT_COLOR ✓ IMAGE_RIGHT_COLOR ? IMAGE_DEPTH x
     //   DEVICE_DEPTH: IMAGE_LEFT_COLOR x IMAGE_RIGHT_COLOR x IMAGE_DEPTH ✓
     //   DEVICE_ALL:   IMAGE_LEFT_COLOR ✓ IMAGE_RIGHT_COLOR ? IMAGE_DEPTH ✓
     // Note: ✓: available, x: unavailable, ?: depends on #stream_mode
-    // params.dev_mode = DeviceMode::DEVICE_ALL;
+    params.dev_mode = DeviceMode::DEVICE_COLOR;
 
     // Color mode: raw(default), rectified
     // params.color_mode = ColorMode::COLOR_RECTIFIED;
 
     // Stream mode: left color only
-    // params.stream_mode = StreamMode::STREAM_640x480;  // vga
-    params.stream_mode = StreamMode::STREAM_1280x720;  // hd
+    params.stream_mode = StreamMode::STREAM_640x480;  // vga
+    //params.stream_mode = StreamMode::STREAM_1280x720;  // hd
     // Stream mode: left+right color
     // params.stream_mode = StreamMode::STREAM_1280x480;  // vga
     // params.stream_mode = StreamMode::STREAM_2560x720;  // hd
+    params.color_stream_format = StreamFormat::STREAM_MJPG;
 
     // Auto-exposure: true(default), false
     // params.state_ae = false;
@@ -84,7 +85,7 @@ int main(int argc, char const* argv[]) {
   // cam.EnableProcessMode(ProcessMode::PROC_IMU_ALL);
 
   // Enable image infos
-  cam.EnableImageInfo(true);
+  cam.EnableImageInfo(false);
 
   cam.Open(params);
 
@@ -100,8 +101,8 @@ int main(int argc, char const* argv[]) {
   bool is_left_ok = cam.IsStreamDataEnabled(ImageType::IMAGE_LEFT_COLOR);
   bool is_depth_ok = cam.IsStreamDataEnabled(ImageType::IMAGE_DEPTH);
 
-  if (is_left_ok) cv::namedWindow("left color");
-  if (is_depth_ok) cv::namedWindow("depth");
+  //if (is_left_ok) cv::namedWindow("left color");
+  //if (is_depth_ok) cv::namedWindow("depth");
 
   CVPainter painter;
   util::Counter counter(params.framerate);
@@ -111,37 +112,37 @@ int main(int argc, char const* argv[]) {
 
     if (is_left_ok) {
       auto left_color = cam.GetStreamData(ImageType::IMAGE_LEFT_COLOR);
-      if (left_color.img) {
-        allow_count = true;
-        cv::Mat left = left_color.img->To(ImageFormat::COLOR_BGR)->ToMat();
-        painter.DrawSize(left, CVPainter::TOP_LEFT);
-        painter.DrawStreamData(left, left_color, CVPainter::TOP_RIGHT);
-        painter.DrawInformation(left, util::to_string(counter.fps()),
-            CVPainter::BOTTOM_RIGHT);
-        cv::imshow("left color", left);
-      }
+      //if (left_color.img) {
+      //  allow_count = true;
+      //  cv::Mat left = left_color.img->To(ImageFormat::COLOR_BGR)->ToMat();
+      //  painter.DrawSize(left, CVPainter::TOP_LEFT);
+      //  painter.DrawStreamData(left, left_color, CVPainter::TOP_RIGHT);
+      //  painter.DrawInformation(left, util::to_string(counter.fps()),
+      //      CVPainter::BOTTOM_RIGHT);
+      //  cv::imshow("left color", left);
+      //}
     }
 
-    if (is_depth_ok) {
-      auto image_depth = cam.GetStreamData(ImageType::IMAGE_DEPTH);
-      if (image_depth.img) {
-        allow_count = true;
-        cv::Mat depth;
-        depth = image_depth.img->ToMat();
-        painter.DrawSize(depth, CVPainter::TOP_LEFT);
-        painter.DrawStreamData(depth, image_depth, CVPainter::TOP_RIGHT);
-        cv::imshow("depth", depth);
-      }
-    }
+    //if (is_depth_ok) {
+    //  auto image_depth = cam.GetStreamData(ImageType::IMAGE_DEPTH);
+    //  if (image_depth.img) {
+    //    allow_count = true;
+    //    cv::Mat depth;
+    //    depth = image_depth.img->ToMat();
+    //    painter.DrawSize(depth, CVPainter::TOP_LEFT);
+    //    painter.DrawStreamData(depth, image_depth, CVPainter::TOP_RIGHT);
+    //    cv::imshow("depth", depth);
+    //  }
+    //}
 
     if (allow_count == true) {
       counter.Update();
     }
-
-    char key = static_cast<char>(cv::waitKey(1));
-    if (key == 27 || key == 'q' || key == 'Q') {  // ESC/Q
-      break;
-    }
+    char key = 0;
+    //char key = static_cast<char>(cv::waitKey(1));
+    //if (key == 27 || key == 'q' || key == 'Q') {  // ESC/Q
+    //  break;
+    //}
   }
 
   cam.Close();
